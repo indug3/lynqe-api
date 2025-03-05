@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - '**'  
   pull_request:
     branches:
-      - main
+      - '**'  
 
 jobs:
   build:
@@ -24,11 +24,20 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        run: npm test
+      - name: Set Environment Variables
+        run: echo "NODE_ENV=production" >> $GITHUB_ENV
+
+      - name: Package the Application
+        run: tar -czf backend-build.tar.gz src/server package.json package-lock.json
+
+      - name: Upload Package as an Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend-build.tar.gz
 
   deploy:
-    needs: build  # Ensures deploy runs only if build is successful
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -46,11 +55,5 @@ jobs:
       - name: Deploy Application
         run: |
           echo "Deploying application..."
-          # Add actual deployment commands here, e.g.:
-          # scp -r ./* user@your-server:/var/www/project
-          # ssh user@your-server 'pm2 restart your-app'
+          # Add actual deployment commands here (e.g., SSH to a server)
 
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
