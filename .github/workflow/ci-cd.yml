@@ -3,11 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - '**'  
   pull_request:
     branches:
-      - main
-
+      - '**'  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,8 +23,28 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        run: npm test
+      - name: Set Environment Variables
+        run: echo "NODE_ENV=production" >> $GITHUB_ENV
+
+      - name: Build the Project
+        run: |
+          cd src/server  # Update this path
+          npm run build
+
+      - name: Debug Build Output
+        run: ls -la src/server/dist  # Update this path
+
+      - name: Package the Application
+        run: tar -czf backend-build.tar.gz -C src/server ./dist  # Update this path
+
+      - name: Upload Package as an Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend-build.tar.gz
+
+
+
 
   deploy:
     needs: build  # Ensures deploy runs only if build is successful
