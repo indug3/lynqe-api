@@ -24,11 +24,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Build
+        run: npm run build
+
       - name: Set Environment Variables
         run: echo "NODE_ENV=production" >> $GITHUB_ENV
 
       - name: Package the Application
-        run: tar -czf backend-build.tar.gz src/server package.json package-lock.json
+        run: tar -czf backend-build.tar.gz src server.js package.json package-lock.json
 
       - name: Upload Package as an Artifact
         uses: actions/upload-artifact@v4
@@ -73,6 +76,8 @@ jobs:
             cd $DEPLOY_PATH
             tar -xzf backend-build.tar.gz
             rm backend-build.tar.gz
-            echo "Restarting application..."
-            # Add service restart commands here, e.g., pm2 restart or systemctl restart
+            echo "Installing dependencies..."
+            npm install --omit=dev
+            echo "Starting the application..."
+            npm run start
           EOF
