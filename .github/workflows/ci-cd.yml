@@ -52,7 +52,21 @@ jobs:
       - name: Extract package
         run: tar -xzf backend-build.tar.gz
 
-      - name: Deploy Application
+      - name: Deploy Application to Server
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           echo "Deploying application..."
-          # Add actual deployment commands here (e.g., SSH to a server, copy files, restart services)
+          sudo apt-get update && sudo apt-get install -y sshpass
+          sshpass -p "$SSH_PASSWORD" scp -P $SSH_PORT backend-build.tar.gz $SSH_USER@$SSH_HOST:$DEPLOY_PATH
+          sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_USER@$SSH_HOST <<EOF
+            cd $DEPLOY_PATH
+            tar -xzf backend-build.tar.gz
+            rm backend-build.tar.gz
+            echo "Restarting application..."
+            # Add service restart commands here, e.g., pm2 restart or systemctl restart
+          EOF
