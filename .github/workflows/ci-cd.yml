@@ -66,7 +66,7 @@ jobs:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          echo "Deploying application..."
+          echo "Deploying application...."
           sudo apt-get update && sudo apt-get install -y sshpass
           sshpass -p "$SSH_PASSWORD" scp backend-build.tar.gz $SSH_USER@$SSH_HOST:$DEPLOY_PATH
           sshpass -p "$SSH_PASSWORD" ssh $SSH_USER@$SSH_HOST <<EOF
